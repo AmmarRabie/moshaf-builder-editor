@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Moshaf-Builder Editor</title>
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="../static/vendors/photon/css/photon.min.css">
+    <link rel="stylesheet" href="../static/vendors/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="../static/vendors/playlist.css">
+
+    <!-- Electron Javascript -->
+    <script>window.$ = window.jQuery = require("jquery")</script>
+
+    <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script> -->
+</head>
+
+<body>
+    <!-- Wrap your entire app inside .window -->
+    <div class="window">
+        <!-- .toolbar-header sits at the top of your app -->
+        <header class="toolbar toolbar-header">
+            <div class="toolbar-actions">
+                <button class="btn btn-default" id="btn-open-project-file">
+                    <span class="icon icon-folder"></span>
+                </button>
+                <span id="project-path">select your project file</span>
+            </div>
+        </header>
+
+        <!-- Your app's content goes inside .window-content -->
+        <div class="window-content">
+            <div class="pane-group">
+
+                <div class="pane-sm sidebar">
+                    <div class="form-group">
+                        <label>Common Folder</label>
+                        <select id="select_common_folder" class="form-control">
+                            <option>Option one</option>
+                            <option>Option two</option>
+                        </select>
+                    </div>
+                    <ul id="view-list-container" class="list-group"
+                        style="overflow-y: scroll; max-height: 300px; scrollbar-width: 10px; scrollbar-color: #006699">
+                    </ul>
+                </div>
+                <div class="pane">
+                    <div id="actions-container">
+                        <div id="playback-container" class="btn-group">
+                            <button id="btn-play" class="btn btn-large btn-default">
+                                <span class="icon icon-play"></span>
+                            </button>
+                            <button id="btn-stop" class="btn btn-large btn-default">
+                                <span class="icon icon-stop"></span>
+                            </button>
+                            <button id="btn-pause" class="btn btn-large btn-default">
+                                <span class="icon icon-pause"></span>
+                            </button>
+                        </div>
+                        <div id="selection-container" class="btn-group pull-right">
+                            <button id="btn-add-note" class="btn btn-large btn-default">Add Segment</button>
+                            <button id="btn-set-edge" class="btn btn-large btn-default">Set Edge</button>
+                        </div>
+                    </div>
+                    <div id="playlist"></div>
+                </div>
+
+            </div>
+        </div>
+
+        <footer class="toolbar toolbar-footer">
+            <div class="toolbar-actions">
+                <button class="btn btn-default">
+                    <span class="icon icon-ccw"></span>
+                    <span>&ThinSpace; Reset</span>
+                </button>
+
+                <button class="btn btn-primary pull-right">
+                    <span class="icon icon-export"></span>
+                    <span>&ThinSpace; Save</span>
+                </button>
+            </div>
+        </footer>
+
+
+    </div>
+
+    <script src="main.js" charset="utf-8"></script>
+</body>
+
+</html>
