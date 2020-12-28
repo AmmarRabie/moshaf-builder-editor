@@ -1,0 +1,18 @@
+{
+  "name": "moshaf-builder-editor",
+  "version": "1.0.0",
+  "description": "project editor for moshaf builder application",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "author": "AmmarRabie",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^11.1.1"
+  },
+  "dependencies": {
+    "jquery": "^3.5.1",
+    "waveform-playlist": "^3.2.4"
+  }
+}
