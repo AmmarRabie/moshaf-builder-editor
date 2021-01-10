@@ -12,7 +12,9 @@
     "electron": "^11.1.1"
   },
   "dependencies": {
+    "fluent-ffmpeg": "^2.1.2",
     "jquery": "^3.5.1",
+    "stream-to-array": "^2.3.0",
     "waveform-playlist": "^3.2.4"
   }
 }
