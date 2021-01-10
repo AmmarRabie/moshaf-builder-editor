@@ -6,7 +6,6 @@ const ffmpeg = require("fluent-ffmpeg")
 
 const ViewList = require("./components/view-list")
 const { SegmentsPlaylist, ChaptersPlaylist } = require("./components/playlist-wrapper")
-const AudioFileReader = require("./io/audio-reader")
 
 
 const testPath = "C:\\Data\\alquran kamel\\01\\ZOOM0001.WAV"
@@ -40,6 +39,12 @@ class EditorMain {
       this.loadProject(mbFilePath)
       $("#project-path").text(mbFilePath)
     });
+    $("#btn-update").on("click", function (e) {
+      self.onUpdateClick()
+    })
+    $("#btn-save").on("click", function (e) {
+      self.saveProject()
+    })
 
     $("input#chapter-select").on("input", function (e) {
       console.log(this.checked);
@@ -86,10 +91,13 @@ class EditorMain {
     this.loadProject()
   }
 
-  loadProject(projectPath = "./tmp.mb") {
-
+  loadProject(projectPath) {
+    projectPath = projectPath || "./tmp.mb"
     if (this.project) {
       // TODO: consider asking for saving if there is a changes
+      this.currentPlaylistWrapper && this.currentPlaylistWrapper.clear()
+      this.segmentsList && this.segmentsList.clear()
+      this.filesList && this.filesList.clear()
     }
     this.project = JSON.parse(fs.readFileSync(projectPath).toString()).project
 
@@ -98,6 +106,17 @@ class EditorMain {
     this.selectedFileIndex = 0 // because we don't want to load playlist till he click
   }
 
+  saveProject(outPath) {
+    outPath = outPath || "./tmp.edited.mb"
+    if (!this.project) {
+      // TODO: alert
+      return
+    }
+    console.log(this);
+    const jsonStr = JSON.stringify({ project: this.project })
+
+    fs.writeFile(outPath, jsonStr, err => console.log(err))
+  }
 
   onFileSelected(e, index) {
     this.selectedFileIndex = index
@@ -143,6 +162,48 @@ class EditorMain {
     // show list of files, segments of a file editing in the main
     this.segmentsList.clear()
     this.filesList.select(-1) // removes all selection
+  }
+
+  onUpdateClick() {
+    console.log(this.currentPlaylistWrapper.chapters)
+    if (!this.selectedFile) return // no files, no segments selected => save what !
+    if (this.isChapterView && this.selectedSeg) {
+      // save current chapters information
+      this._updateSelectedChapter()
+    }
+    else if (!this.isChapterView) {
+      // save current segments information
+      this._updateSelectedSegment
+    }
+  }
+
+  _updateSelectedChapter() {
+    let newInfo = this.currentPlaylistWrapper.chapters
+    const seg = this.selectedSeg
+    // return to global start and end
+    newInfo = newInfo.map(chapter => ({ ...chapter, start: seg.start + chapter.start, end: seg.start + chapter.end }))
+    const oldInfo = seg.chapters
+    seg.chapters = newInfo.map(chapter => {
+      let old = {};
+      if (chapter.index < oldInfo.length)
+        old = oldInfo[chapter.index]
+      const res = {
+        ...old,
+        chapter: chapter.sura,
+        globalStart: chapter.start,
+        globalEnd: chapter.end,
+        manual: true
+      }
+      if (res.extras) {
+        res.extras.best_aya.sura = chapter.sura
+        res.extras.best_aya.index = chapter.aya
+      }
+      return res
+    })
+  }
+
+  _updateSelectedSegment() {
+    alert("not yet implemented")
   }
 
   _newFilesList(list, container = "#view-list-container", imgPath = path.join(__dirname, "../assets/audio-file.png")) {

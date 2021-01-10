@@ -167,7 +167,7 @@ class BasePlaylist {
   setVolume(gain) {
     console.log(gain)
     const ee = this.playlist.getEventEmitter()
-    ee.emit("mastervolumechange", gain)    
+    ee.emit("mastervolumechange", gain)
   }
 
   zoom_in() {
@@ -200,6 +200,27 @@ class SegmentsPlaylist extends BasePlaylist {
     delete config.file
     // this._load()
   }
+
+  get segments() {
+    const annotations = this.playlist.annotationList.annotations
+    return annotations.map(annotation => {
+      const line = annotation.lines[0]
+      const sura = +line.split("_")[0].trim()
+      const curlSeps = line.split("{")
+      let aya;
+      if(curlSeps.length === 1)
+        aya = line.split("_")[1].trim()
+      else aya = curlSeps[0].split("_")[1].trim()
+      aya = +aya
+      return {
+        sura,//annotation.lines[0],
+        aya,
+        start: annotation.start,
+        end: annotation.end,
+        index: line.id
+      }
+    })
+  }
 }
 
 class ChaptersPlaylist extends BasePlaylist {
@@ -218,11 +239,32 @@ class ChaptersPlaylist extends BasePlaylist {
     super(config)
     this.segment = config.segment // TODO: add required for file and segment fields
   }
-  
+
   static async fromFileAndSeg(config) {
     const buffer = await AudioFileReader.readRange(config.file.path, config.segment.start, config.segment.end)
     config.buffer = buffer
     return new ChaptersPlaylist(config)
+  }
+
+  get chapters() {
+    const annotations = this.playlist.annotationList.annotations
+    return annotations.map(annotation => {
+      const line = annotation.lines[0]
+      const sura = +line.split("_")[0].trim()
+      const curlSeps = line.split("{")
+      let aya;
+      if(curlSeps.length === 1)
+        aya = line.split("_")[1].trim()
+      else aya = curlSeps[0].split("_")[1].trim()
+      aya = +aya
+      return {
+        sura,//annotation.lines[0],
+        aya,
+        start: annotation.start,
+        end: annotation.end,
+        index: +annotation.id.split("_")[1]
+      }
+    })
   }
 }
 
