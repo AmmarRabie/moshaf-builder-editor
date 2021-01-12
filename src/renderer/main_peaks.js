@@ -1,23 +1,24 @@
 const path = require("path")
 const fs = require("fs")
+const { ProjectFileEditor, ChapterEditor } = require("./components/peaks-wrapper")
 
 const { dialog } = require('electron').remote
-const ffmpeg = require("fluent-ffmpeg")
 
 const ViewList = require("./components/view-list")
 const { SegmentsPlaylist, ChaptersPlaylist } = require("./components/playlist-wrapper")
+const Peaks = require('peaks.js');
 
+const options = {
+  containers: {
+    overview: document.getElementById('overview-container'),
+    zoomview: document.getElementById('zoomview-container')
+  },
+  mediaElement: document.querySelector('audio'),
+  dataUri: {
+    arraybuffer: '../../assets/test.dat'
+  },
 
-const testPath = "C:\\Data\\alquran kamel\\01\\ZOOM0001.WAV"
-const s = Math.round(1314.795867)
-const e = Math.round(1758.212556)
-const command = ffmpeg(testPath).seekInput(s).duration(e - s).format("wav"); //.saveToFile("node.101.wav");
-command.on('start', function (commandLine) {
-  console.log('Spawned Ffmpeg with command: ' + commandLine);
-})
-command.on('end', function () {
-  console.log('end processing ');
-})
+};
 
 class EditorMain {
 
@@ -27,17 +28,44 @@ class EditorMain {
     this.currentPlaylistWrapper = null
     this.filesList = null
     this.segmentsList = null
+    this.projectFileEditor = new ProjectFileEditor()
+    this.chapterFileEditor = new ChapterEditor()
   }
 
   init() {
     var self = this;
+    // add button listeners
+    $("#btn-zoomin").on("click", e => {
+      this.currentEditor && this.currentEditor.instance.zoom.zoomIn()
+    })
+    $("#btn-zoomout").on("click", e => {
+      this.currentEditor && this.currentEditor.instance.zoom.zoomOut()
+    })
+
+    $("#btn-pause").on("click", e => {
+      this.currentEditor && this.currentEditor.instance.player.pause();
+    })
+    $("#btn-stop").on("click", e => {
+      if (!this.currentEditor) return
+      const peaks = this.currentEditor.instance
+      const zoomview = peaks.views.getView("zoomview");
+      const persistFrame = zoomview.getFrameOffset()
+      peaks.player.pause()
+      peaks.player.seek(0)
+      console.log(persistFrame);
+      setTimeout(() => zoomview._updateWaveform(persistFrame), 100)
+    })
+    $("#btn-play").on("click", e => {
+      this.currentEditor && this.currentEditor.instance.player.play();
+    })
+
+
     $("#btn-open-project-file").on("click", e => {
       const filePaths = dialog.showOpenDialogSync({ filters: [{ name: "moshaf-builder projcet file", extensions: ["mb", "json"] }] })
       if (filePaths === undefined) return
       console.log(filePaths, "chosen");
       const mbFilePath = filePaths[0]
       this.loadProject(mbFilePath)
-      $("#project-path").text(mbFilePath)
     });
     $("#btn-update").on("click", function (e) {
       self.onUpdateClick()
@@ -53,42 +81,17 @@ class EditorMain {
       else self.onSegmentView()
     })
 
-    $("#btn-pause").on("click", e => {
-      if (!this.currentPlaylistWrapper) return
-      this.currentPlaylistWrapper.pause()
-    })
-    $("#btn-stop").on("click", e => {
-      if (!this.currentPlaylistWrapper) return
-      this.currentPlaylistWrapper.stop()
-    })
-    $("#btn-play").on("click", e => {
-      if (!this.currentPlaylistWrapper) return
-      this.currentPlaylistWrapper.play()
-    })
+
 
     $("#btn-add-note").on("click", e => {
-      if (!this.currentPlaylistWrapper) return
-      this.currentPlaylistWrapper.addNote()
+
     })
     $("#btn-set-edge").on("click", e => {
       if (!this.currentPlaylistWrapper) return
       this.currentPlaylistWrapper.setEdge()
     })
 
-    $("#btn-zoomin").on("click", e => {
-      if (!this.currentPlaylistWrapper) return
-      this.currentPlaylistWrapper.zoom_in()
-    })
-    $("#btn-zoomout").on("click", e => {
-      if (!this.currentPlaylistWrapper) return
-      this.currentPlaylistWrapper.zoom_out()
-    })
-
-    $("input#volume-gain").on("input", function (e) {
-      if (!self.currentPlaylistWrapper) return
-      self.currentPlaylistWrapper.setVolume(this.value)
-    })
-    this.loadProject()
+    this.loadProject() // TODO: remove auto open project
   }
 
   loadProject(projectPath) {
@@ -102,8 +105,8 @@ class EditorMain {
     this.project = JSON.parse(fs.readFileSync(projectPath).toString()).project
 
     this.filesList = this._newFilesList(this.project.files)
-    this.filesList.select(0) // don't call onFileSelected
-    this.selectedFileIndex = 0 // because we don't want to load playlist till he click
+    this.onFileSelected(null, 0)
+    $("#project-path").text(projectPath)
   }
 
   saveProject(outPath) {
@@ -127,14 +130,11 @@ class EditorMain {
     if (this.isChapterView) { // chapters of a segment editing scenario
       // inflate segments list of current file
       this.segmentsList = this._newSegmentsList(this.selectedFile)
+      this.onSegmentSelected(0)
     }
     else { // segments of an audio file editing scenario
       // inflate the playlist of current file
-      this.currentPlaylistWrapper && this.currentPlaylistWrapper.clear()
-      this.currentPlaylistWrapper = new SegmentsPlaylist({
-        container: "#playlist",
-        file: this.selectedFile
-      })
+      this.projectFileEditor.setSource(this.selectedFile)
     }
   }
 
@@ -206,14 +206,14 @@ class EditorMain {
     alert("not yet implemented")
   }
 
-  _newFilesList(list, container = "#view-list-container", imgPath = path.join(__dirname, "../assets/audio-file.png")) {
+  _newFilesList(list, container = "#view-list-container", imgPath = path.join(__dirname, "../../assets/audio-file.png")) {
     this.filesList && this.filesList.clear()
     const viewList = this._newListView(container, imgPath, list, t => path.basename(t.path), t => t.path)
     viewList.addItemClickListener((e, index) => this.onFileSelected(e, index))
     return viewList
   }
 
-  _newSegmentsList(file, container = "#view-list-container-below", imgPath = path.join(__dirname, "../assets/scissors.png")) {
+  _newSegmentsList(file, container = "#view-list-container-below", imgPath = path.join(__dirname, "../../assets/scissors.png")) {
     this.segmentsList && this.segmentsList.clear()
     const fileName = path.basename(file.path)
     const viewList = this._newListView(container, imgPath, file.segments, t => t.name, _ => fileName)
@@ -237,6 +237,12 @@ class EditorMain {
   get selectedSeg() {
     if (!this.project || !this.project.files) return "sd"
     return this.selectedFile.segments[this.selectedSegIndex]
+  }
+  get currentEditor() {
+    if (this.isChapterView) {
+      return this.chapterFileEditor
+    }
+    return this.projectFileEditor
   }
 }
 
