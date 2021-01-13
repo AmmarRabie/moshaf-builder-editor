@@ -33,6 +33,11 @@ class ProjectFileEditor {
             editable: true,
             labelText: seg.name,
         }))
+        const $audioContainer = $(options.mediaElement)
+        $audioContainer.empty()
+        $audioContainer.append(`<source src="${file.path}" type="audio/wav">`)
+        $audioContainer[0].load()
+
         this._peaks = Peaks.init(options, (err, peaks) => {
             if (!err) return
             console.log(err)
