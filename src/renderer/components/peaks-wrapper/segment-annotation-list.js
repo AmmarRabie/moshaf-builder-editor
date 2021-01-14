@@ -42,6 +42,15 @@ class SegmentAnnotationList {
     get $instance() {
         return this.$annotationList
     }
+
+    destroy(){
+        this.clear()
+        this.$container.empty()
+    }
+
+    clear(){
+        this.$instance.empty()
+    }
 }
 
 

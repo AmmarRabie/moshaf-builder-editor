@@ -112,6 +112,7 @@ class ProjectFileEditor {
 
     clear() {
         if (this.instance) this.instance.destroy()
+        if(this.annotationsList) this.annotationsList.destroy()
     }
 
     get instance() {
