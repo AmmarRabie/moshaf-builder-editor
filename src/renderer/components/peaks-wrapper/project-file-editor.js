@@ -77,10 +77,11 @@ class ProjectFileEditor {
         this.annotationsList = segmentsList
     }
 
-    addSegment() {
-        const zoomview = this.instance.views.getView("zoomview")
-        const startTime = zoomview.pixelsToTime(zoomview.getFrameOffset())
-        const endTime = startTime + zoomview.pixelsToTime(zoomview.getWidth())
+    /**
+     * Adds segment in the current zoomview
+     */
+    addSegmentHere() {
+        const { startTime, endTime } = this._zoomviewRange
         this.instance.segments.add({
             startTime, endTime, labelText: "inserted", editable: true
         })
@@ -112,11 +113,19 @@ class ProjectFileEditor {
 
     clear() {
         if (this.instance) this.instance.destroy()
-        if(this.annotationsList) this.annotationsList.destroy()
+        if (this.annotationsList) this.annotationsList.destroy()
     }
 
     get instance() {
         return this._peaks
+    }
+
+
+    get _zoomviewRange() {
+        const zoomview = this.instance.views.getView("zoomview")
+        const startTime = zoomview.pixelsToTime(zoomview.getFrameOffset())
+        const endTime = startTime + zoomview.pixelsToTime(zoomview.getWidth())
+        return { startTime, endTime }
     }
 
 

@@ -25,17 +25,11 @@ class SegmentAnnotationList {
         this.$instance.append(newSegment.$instance)
     }
 
-    removeSegment(segment) {
-        console.log("removing segment respond");
-
-    }
-
     _setupEmitter() {
         // manipulates the list (adding or removing)
         this.emitter.on("segments.add", newSegments => { //? considered peaks dependency here
             newSegments.map(seg => this.addSegment(seg))
-        }) 
-        this.emitter.on("segments.remove", this.removeSegment) //? considered peaks dependency here
+        })
     }
 
 

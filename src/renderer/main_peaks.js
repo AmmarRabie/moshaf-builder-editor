@@ -84,11 +84,7 @@ class EditorMain {
 
 
     $("#btn-add-note").on("click", e => {
-      this.currentEditor.addSegment()
-    })
-    $("#btn-set-edge").on("click", e => {
-      if (!this.currentPlaylistWrapper) return
-      this.currentPlaylistWrapper.setEdge()
+      this.currentEditor && this.currentEditor.addSegmentHere()
     })
 
     this.loadProject() // TODO: remove auto open project

@@ -6,15 +6,19 @@ class SegmentAnnotation {
     static template = `
     <li class="annotation">
         <span class="color-rect"></span>
-
+        
         <span class="time-info">
-            <span class="time-start">00:00:00</span>
-            <span class="separator">--</span>
-            <span class="time-end">00:00:00</span>
+        <span class="time-start">00:00:00</span>
+        <span class="separator">--</span>
+        <span class="time-end">00:00:00</span>
         </span>
-
+        
         <input required id="annotation-name" placeholder="Enter segment name" type="text">
         <input id="annotation-extra" placeholder="Optional extra info or hints" type="text">
+        
+        <button class="btn btn-mini btn-negative">
+            <span class="icon icon-cancel"></span>
+        </button>
     </li>
     `
     constructor(options, segment) {
@@ -24,6 +28,8 @@ class SegmentAnnotation {
         this.eventEmitter = options.eventEmitter || new EventEmitter()
         this.update(segment)
         this._setupEmitter()
+
+        this.$annotation.hover(e => this.$instance.find("button").show(), e => this.$instance.find("button").hide())
     }
 
     update(seg) {
@@ -58,6 +64,10 @@ class SegmentAnnotation {
                 segment: self.segment,
                 newValue: $(this).val()
             })
+        })
+        this.$instance.find("button").click(function (e) {
+            self.eventEmitter.emit("segments.remove", [self.segment]) //? considered peaks dependency here
+            self.$instance.remove()
         })
     }
     get $instance() {
