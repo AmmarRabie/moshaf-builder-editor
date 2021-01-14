@@ -1,0 +1,49 @@
+.loading { 
+    opacity: 0.5;
+    visibility: hidden;
+}
+
+ul.annotations {
+    list-style-type: none;
+    white-space: nowrap;
+    margin-top: 16px;
+}
+ul.annotations li.annotation {
+    width: 90%;
+    margin-top: 8px;
+    font-size: 20px;
+}
+
+ul.annotations li.annotation > * {
+    margin-right: 8px;
+    height: 100%;
+}
+
+ul.annotations li.annotation .color-rect {
+    padding: 0px 10px;
+    /* will be inflated using js */
+    /* background-color: brown;  */
+    cursor: pointer;
+}
+ul.annotations li.annotation .color-rect:hover {
+    opacity: 0.5;
+    /* transform doesn't work :( */
+}
+
+li.annotation input {
+    /* text-align: center; */
+    width: 30%;
+}
+
+li.annotation .time-info{
+    color: rgb(107, 92, 15);
+    border: 2px solid grey;
+    padding: 2px;
+}
+
+.time-info .time-start, .time-info .time-end{
+    cursor: pointer;
+}
+li.annotation .time-info .separator{
+    color: black;
+}

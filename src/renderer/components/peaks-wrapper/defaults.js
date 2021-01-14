@@ -1,7 +1,8 @@
 const defaultOptions = {
     containers: {
         overview: document.getElementById('overview-container'),
-        zoomview: document.getElementById('zoomview-container')
+        zoomview: document.getElementById('zoomview-container'),
+        annotationsview: document.getElementById('annotations-container')
     },
     mediaElement: document.querySelector('audio'),
 
