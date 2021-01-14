@@ -30,6 +30,7 @@ class SegmentAnnotation {
         this._setupEmitter()
 
         this.$annotation.hover(e => this.$instance.find("button").show(), e => this.$instance.find("button").hide())
+        this.$instance.find("button").hide()
     }
 
     update(seg) {
@@ -66,7 +67,7 @@ class SegmentAnnotation {
             })
         })
         this.$instance.find("button").click(function (e) {
-            self.eventEmitter.emit("segments.remove", [self.segment]) //? considered peaks dependency here
+            self.eventEmitter.emit("annotations.remove", self.segment)
             self.$instance.remove()
         })
     }

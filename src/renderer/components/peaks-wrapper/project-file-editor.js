@@ -102,6 +102,9 @@ class ProjectFileEditor {
         this.instance.on("annotations.update", ({ segment, newValue }) => {
             segment.update({ labelText: newValue })
         })
+        this.instance.on("annotations.remove", segment => {
+            this.instance.segments.removeById(segment.id)
+        })
     }
 
     /**
