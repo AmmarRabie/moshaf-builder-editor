@@ -51,10 +51,10 @@ class ChapterAnnotation extends BaseAnnotation{
     _setupEmitter() {
         super._setupEmitter()
         const self = this
-        this.$chapterSelect.change(function (e) {
+        this.$instance.find("select").change(function (e) {
             self.eventEmitter.emit("annotations.update", {
                 segment: self.note,
-                newValues: { labelText: $(this).val().toString() }
+                newValues: { labelText: self.$chapterSelect.val().toString() + "_" + self.$ayatSelect.val().toString() }
             })
         })
     }

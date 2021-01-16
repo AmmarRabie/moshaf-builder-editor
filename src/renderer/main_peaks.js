@@ -156,45 +156,58 @@ class EditorMain {
   }
 
   onUpdateClick() {
-    console.log(this.currentPlaylistWrapper.chapters)
     if (!this.selectedFile) return // no files, no segments selected => save what !
     if (this.isChapterView && this.selectedSeg) {
       // save current chapters information
-      this._updateSelectedChapter()
+      this._updateSelectedSegment()
     }
     else if (!this.isChapterView) {
       // save current segments information
-      this._updateSelectedSegment
+      this._updateSelectedFile()
     }
   }
 
-  _updateSelectedChapter() {
-    let newInfo = this.currentPlaylistWrapper.chapters
-    const seg = this.selectedSeg
-    // return to global start and end
-    newInfo = newInfo.map(chapter => ({ ...chapter, start: seg.start + chapter.start, end: seg.start + chapter.end }))
-    const oldInfo = seg.chapters
-    seg.chapters = newInfo.map(chapter => {
-      let old = {};
-      if (chapter.index < oldInfo.length)
-        old = oldInfo[chapter.index]
-      const res = {
-        ...old,
-        chapter: chapter.sura,
-        globalStart: chapter.start,
-        globalEnd: chapter.end,
-        manual: true
+  _updateSelectedSegment() {
+    const newChapters = this.currentEditor.instance.segments.getSegments() // TODO: don't use peaks methods here, use annotationsList instead
+    this.selectedSeg.chapters = newChapters.map(newChap => {
+      console.log(newChap, "updated to this.project");
+      const labelParts = newChap.labelText.split("_")
+      const sura = labelParts[0]
+      const aya = labelParts[1]
+      newChap.extras.best_aya.index = aya
+      newChap.extras.best_aya.sura = sura
+      return {
+        // may be updated, get from the editor
+        globalStart: newChap.startTime,
+        globalEnd: newChap.endTime,
+        chapter: sura,
+        aya,
+
+        // old date, it is also in the newChap.. TODO: match with name(or may add field ID) and use ...old for better modularity
+        extras: newChap.extras,
+        processed: newChap.processed,
+
+        manual: true // save info that this piece is edited from the user
       }
-      if (res.extras) {
-        res.extras.best_aya.sura = chapter.sura
-        res.extras.best_aya.index = chapter.aya
-      }
-      return res
     })
   }
 
-  _updateSelectedSegment() {
-    alert("not yet implemented")
+  _updateSelectedFile() {
+    const newSegments = this.currentEditor.instance.segments.getSegments() // TODO: don't use peaks methods here, use annotationsList instead
+    this.selectedFile.segments = newSegments.map(newSeg => {
+      return {
+        // may be updated, get from the editor
+        start: newSeg.startTime,
+        end: newSeg.endTime,
+        name: newSeg.labelText,
+
+        // old date, it is also in the newSeg.. TODO: match with name(or may add field ID) and use ...old for better modularity
+        chapters: newSeg.chapters,
+        processed: newSeg.processed,
+
+        manual: true // save info that this piece is edited from the user
+      }
+    })
   }
 
   _newFilesList(list, container = "#view-list-container", imgPath = path.join(__dirname, "../../assets/audio-file.png")) {
@@ -222,7 +235,7 @@ class EditorMain {
 
   // getters
   get selectedFile() {
-    if (!this.project || !this.project.files) return "sd"
+    if (!this.project || !this.project.files) return null
     return this.project.files[this.selectedFileIndex]
   }
   get selectedSeg() {

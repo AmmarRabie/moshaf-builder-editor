@@ -32,7 +32,7 @@ class ChapterEditor extends BaseEditor {
             startTime: chap.globalStart,
             endTime: chap.globalEnd,
             editable: true,
-            labelText: String(chap.chapter),
+            labelText: String(chap.chapter) + "_" + String(chap.extras.best_aya.index),
             aya: chap.extras.best_aya.index,
             ...chap
         }))
