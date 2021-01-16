@@ -1,7 +1,7 @@
-const { EventEmitter } = require("events")
+const BaseAnnotation = require("./base-annotation")
 
 
-class SegmentAnnotation {
+class SegmentAnnotation extends BaseAnnotation {
 
     static template = `
     <li class="annotation">
@@ -16,67 +16,42 @@ class SegmentAnnotation {
         <input required id="annotation-name" placeholder="Enter segment name" type="text">
         <input id="annotation-extra" placeholder="Optional extra info or hints" type="text">
         
-        <button class="btn btn-mini btn-negative">
+        <button class="annotation-delete btn btn-mini btn-negative">
             <span class="icon icon-cancel"></span>
         </button>
     </li>
     `
     constructor(options, segment) {
-        if (!options.container) throw Error("should have container when init segment annotations list")
-        this.$annotation = $(SegmentAnnotation.template)
-        this.$container = $(options.container)
-        this.eventEmitter = options.eventEmitter || new EventEmitter()
-        this.update(segment)
-        this._setupEmitter()
+        // some sort of validation
+        if (!options.container) throw Error("should have container when init chapter annotations list")
 
-        this.$annotation.hover(e => this.$instance.find("button").show(), e => this.$instance.find("button").hide())
-        this.$instance.find("button").hide()
+        // super init (basic default init)
+        options.template = SegmentAnnotation.template
+        super(options, segment)
+
+        // first update (init)
+        this.update(segment)
     }
 
     update(seg) {
-        // don't respond to other segments update for now, TODO: we may add here logic of updating time values so that
-        // not to be collapsed
-        if (this._segment !== undefined && this._segment.id !== seg.id) return
+        // update basic info
+        const updated = super.update(seg)
+        if (!updated) return updated
 
-        this.$instance.find(".color-rect").css({
-            "background-color": seg.color,
-        })
-        this.$instance.find(".time-start").text(seg.startTime)
-        this.$instance.find(".time-end").text(seg.endTime)
+        // custom to mb segment
         this.$instance.find("#annotation-name").val(seg.labelText)
         this.$instance.find("#annotation-extra").val(seg.extraText || "")
-        this._segment = seg
     }
 
     _setupEmitter() {
+        super._setupEmitter()
         const self = this
-        this.eventEmitter.on("segments.dragend", this.update.bind(this)) //? considered peaks dependency here
-        this.$instance.find(".color-rect").click(e => {
-            this.eventEmitter.emit("annotations.play", this._segment)
-        })
-        this.$instance.find(".time-start").click(e => {
-            this.eventEmitter.emit("annotations.stime-focus", this._segment)
-        })
-        this.$instance.find(".time-end").click(e => {
-            this.eventEmitter.emit("annotations.etime-focus", this._segment)
-        })
-        this.$instance.find("#annotation-name").change(function (e) {
+        this.$instance.find("input#annotation-name").change(function (e) {
             self.eventEmitter.emit("annotations.update", {
-                segment: self.segment,
-                newValue: $(this).val()
+                segment: self.note,
+                newValues: { labelText: $(this).val().toString() }
             })
         })
-        this.$instance.find("button").click(function (e) {
-            self.eventEmitter.emit("annotations.remove", self.segment)
-            self.$instance.remove()
-        })
-    }
-    get $instance() {
-        return this.$annotation
-    }
-
-    get segment(){
-        return this._segment
     }
 }
 
