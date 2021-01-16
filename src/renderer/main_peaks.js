@@ -29,7 +29,7 @@ class EditorMain {
     this.filesList = null
     this.segmentsList = null
     this.projectFileEditor = new ProjectFileEditor()
-    this.chapterFileEditor = new ChapterEditor()
+    this.chapterEditor = new ChapterEditor()
   }
 
   init() {
@@ -139,13 +139,8 @@ class EditorMain {
     this.segmentsList.select(index)
 
     console.log("selecting segment: ", this.selectedSeg)
-    // console.log(buf.length);
-    this.currentPlaylistWrapper && this.currentPlaylistWrapper.clear()
-    this.currentPlaylistWrapper = await ChaptersPlaylist.fromFileAndSeg({
-      file: this.selectedFile,
-      segment: this.selectedSeg,
-      container: "#playlist"
-    })
+    this.projectFileEditor.clear()
+    this.chapterEditor.setSource(this.selectedFile)
   }
 
   onChapterView() {
@@ -236,7 +231,7 @@ class EditorMain {
   }
   get currentEditor() {
     if (this.isChapterView) {
-      return this.chapterFileEditor
+      return this.chapterEditor
     }
     return this.projectFileEditor
   }

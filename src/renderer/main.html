@@ -5,17 +5,15 @@
     <title>Moshaf-Builder Editor</title>
 
     <!-- Stylesheets -->
-    <link rel="stylesheet" href="../../static/vendors/photon/css/photon.min.css">
-    <link rel="stylesheet" href="../../static/vendors/font-awesome/css/font-awesome.min.css">
-    <!-- <link rel="stylesheet" href="../../static/vendors/bootstrap/4.1.3/css/bootstrap.min.css" /> -->
-    <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous"> -->
-
+    <link rel="stylesheet" href="../static/vendors/photon/css/photon.min.css">
+    <link rel="stylesheet" href="../static/vendors/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="../static/vendors/playlist.css">
     <link rel="stylesheet" href="./main.css">
 
     <!-- Electron Javascript -->
     <script>window.$ = window.jQuery = require("jquery")</script>
-    <!-- <script>require('popper.js');</script>
-    <script>require('bootstrap');</script> -->
+
+    <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script> -->
 </head>
 
 <body>
@@ -61,7 +59,7 @@
                 </div>
                 <div class="pane">
                     <div id="actions-container">
-                        <div id="audio-controls" class="btn-group">
+                        <div id="playback-container" class="btn-group">
                             <button id="btn-play" class="btn btn-large btn-default">
                                 <span class="icon icon-play"></span>
                             </button>
@@ -82,22 +80,12 @@
                         </div>
                         <input type="range" name="gain" id="volume-gain" min="0" max="100">
                         <div id="selection-container" class="btn-group pull-right">
-                            <button id="btn-add-note" class="btn btn-large btn-default">Add Segment here</button>
+                            <button id="btn-add-note" class="btn btn-large btn-default">Add Segment</button>
+                            <button id="btn-set-edge" class="btn btn-large btn-default">Set Edge</button>
                         </div>
                     </div>
-                    <div id="peaks-container">
-                        <div id="zoomview-container"></div>
-                        <div id="overview-container"></div>
-
-                        <h2 id="annotations-header">Segments</h2>
-                        <div class="annotations" id="annotations-container">
-                        </div>
+                    <div id="playlist">
                     </div>
-                    <!-- <audio controls="audio-controls"> -->
-                    <audio>
-                        <!-- <source id="playback-source" src="../../assets/ZOOM0001.WAV" type="audio/wav">
-                        "your browser doesn't support audio element" -->
-                    </audio>
                 </div>
 
             </div>
@@ -119,7 +107,7 @@
 
     </div>
 
-    <script src="main_peaks.js" charset="utf-8"></script>
+    <script src="main.js" charset="utf-8"></script>
 </body>
 
 </html>
