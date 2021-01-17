@@ -70,6 +70,7 @@ class ChapterEditor extends BaseEditor {
         return super.addSegmentHere({
             chapter: 1,
             aya: 1,
+            labelText: "1_1",
         })
     }
 

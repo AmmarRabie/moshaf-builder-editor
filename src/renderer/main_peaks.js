@@ -102,7 +102,7 @@ class EditorMain {
     console.log(this);
     const jsonStr = JSON.stringify({ project: this.project })
 
-    fs.writeFile(outPath, jsonStr, err => console.log(err))
+    fs.writeFile(outPath, jsonStr, "utf8", err => console.log(err))
   }
 
   onFileSelected(e, index) {
@@ -135,7 +135,7 @@ class EditorMain {
     // on user request to change view to chapter
     // show list of files, list of segments, chapters of a segment editing in the main
     this.segmentsList = this._newSegmentsList(this.selectedFile)
-    if(this.selectedFile)
+    if (this.selectedFile)
       this.onSegmentSelected(null, 0)
     // validateSegmentsDatFiles()
   }
@@ -162,10 +162,15 @@ class EditorMain {
     const newChapters = this.currentEditor.instance.segments.getSegments() // TODO: don't use peaks methods here, use annotationsList instead
     this.selectedSeg.chapters = newChapters.map(newChap => {
       const labelParts = newChap.labelText.split("_")
-      const sura = labelParts[0]
-      const aya = labelParts[1]
-      newChap.extras.best_aya.index = aya
-      newChap.extras.best_aya.sura = sura
+      const sura = +labelParts[0]
+      const aya = +labelParts[1]
+      if (newChap.extras) {
+        newChap.extras.best_aya.index = aya
+        newChap.extras.best_aya.sura = sura
+      }
+      else {
+        newChap.extras = { best_aya: { index: aya, sura: sura } }
+      }
       return {
         // may be updated, get from the editor
         globalStart: newChap.startTime,
@@ -174,8 +179,8 @@ class EditorMain {
         aya,
 
         // old date, it is also in the newChap.. TODO: match with name(or may add field ID) and use ...old for better modularity
-        extras: newChap.extras,
-        processed: newChap.processed,
+        extras: newChap.extras || false, // false so that act like not set
+        processed: newChap.processed || false,
 
         manual: true // save info that this piece is edited from the user
       }
@@ -192,8 +197,8 @@ class EditorMain {
         name: newSeg.labelText,
 
         // old date, it is also in the newSeg.. TODO: match with name(or may add field ID) and use ...old for better modularity
-        chapters: newSeg.chapters,
-        processed: newSeg.processed,
+        chapters: newSeg.chapters || [],
+        processed: newSeg.processed || false,
 
         manual: true // save info that this piece is edited from the user
       }
