@@ -1,10 +1,12 @@
 
 
 class ViewList {
-    constructor(config){
+    constructor(config) {
         this.$container = $(config.container)
         this.width = config.width || 32
         this.height = config.height || 32
+
+        this._onLiClick = this._onLiClick.bind(this)
     }
 
     get testGet() {
@@ -21,8 +23,8 @@ class ViewList {
                 </div>
             </li>
       `)
-      this.$container.append($currentListItem)
-      // TODO: Add hover method for div.media-body to show truncated information in a tooltip
+        this.$container.append($currentListItem)
+        // TODO: Add hover method for div.media-body to show truncated information in a tooltip
     }
 
     select(index) {
@@ -30,18 +32,23 @@ class ViewList {
         this.$container.find(`li:nth-child(${index + 1})`).addClass("active")
     }
 
-    addItemClickListener(listener){
-        this.$container.find("li").on("click", e => {
-            const $target = $(e.target)
-            let index = -1
-            if($target.prop("tagName") === "LI") index = $target.index()
-            else index = $target.parents("li").index()
-            listener(e, index)
-        })
+    setItemClickListener(listener) {
+        this.listener = listener
+        this.$container.find("li").on("click", this._onLiClick)
+    }
+
+    _onLiClick(e) {
+        if(!this.listener) return
+        const $target = $(e.target)
+        let index = -1
+        if ($target.prop("tagName") === "LI") index = $target.index()
+        else index = $target.parents("li").index()
+        this.listener(e, index)
     }
 
     clear() {
-        this.$container.html('')
+        this.$container.find("li").off("click", this._onLiClick)
+        this.$container.empty()
     }
 }
 

@@ -1,24 +1,11 @@
 const path = require("path")
 const fs = require("fs")
+
 const { ProjectFileEditor, ChapterEditor } = require("./components/peaks-wrapper")
 
 const { dialog } = require('electron').remote
 
 const ViewList = require("./components/view-list")
-const { SegmentsPlaylist, ChaptersPlaylist } = require("./components/playlist-wrapper")
-const Peaks = require('peaks.js');
-
-const options = {
-  containers: {
-    overview: document.getElementById('overview-container'),
-    zoomview: document.getElementById('zoomview-container')
-  },
-  mediaElement: document.querySelector('audio'),
-  dataUri: {
-    arraybuffer: '../../assets/test.dat'
-  },
-
-};
 
 class EditorMain {
 
@@ -71,6 +58,7 @@ class EditorMain {
       self.onUpdateClick()
     })
     $("#btn-save").on("click", function (e) {
+      self.onUpdateClick()
       self.saveProject()
     })
 
@@ -94,7 +82,7 @@ class EditorMain {
     projectPath = projectPath || "./tmp.mb"
     if (this.project) {
       // TODO: consider asking for saving if there is a changes
-      this.currentPlaylistWrapper && this.currentPlaylistWrapper.clear()
+      this.currentEditor && this.currentEditor.clear()
       this.segmentsList && this.segmentsList.clear()
       this.filesList && this.filesList.clear()
     }
@@ -126,7 +114,7 @@ class EditorMain {
     if (this.isChapterView) { // chapters of a segment editing scenario
       // inflate segments list of current file
       this.segmentsList = this._newSegmentsList(this.selectedFile)
-      this.onSegmentSelected(0)
+      this.onSegmentSelected(null, 0)
     }
     else { // segments of an audio file editing scenario
       // inflate the playlist of current file
@@ -134,25 +122,28 @@ class EditorMain {
     }
   }
 
-  async onSegmentSelected(e, index) {
+  onSegmentSelected(e, index) {
     this.selectedSegIndex = index
     this.segmentsList.select(index)
 
     console.log("selecting segment: ", this.selectedSeg)
     this.projectFileEditor.clear()
-    this.chapterEditor.setSource(this.selectedFile)
+    this.chapterEditor.setSource(this.selectedFile, this.selectedSeg)
   }
 
   onChapterView() {
     // on user request to change view to chapter
     // show list of files, list of segments, chapters of a segment editing in the main
     this.segmentsList = this._newSegmentsList(this.selectedFile)
+    if(this.selectedFile)
+      this.onSegmentSelected(null, 0)
+    // validateSegmentsDatFiles()
   }
   onSegmentView() {
     // on user request to change view to segments
     // show list of files, segments of a file editing in the main
     this.segmentsList.clear()
-    this.filesList.select(-1) // removes all selection
+    this.onFileSelected(null, 0)
   }
 
   onUpdateClick() {
@@ -170,7 +161,6 @@ class EditorMain {
   _updateSelectedSegment() {
     const newChapters = this.currentEditor.instance.segments.getSegments() // TODO: don't use peaks methods here, use annotationsList instead
     this.selectedSeg.chapters = newChapters.map(newChap => {
-      console.log(newChap, "updated to this.project");
       const labelParts = newChap.labelText.split("_")
       const sura = labelParts[0]
       const aya = labelParts[1]
@@ -213,7 +203,7 @@ class EditorMain {
   _newFilesList(list, container = "#view-list-container", imgPath = path.join(__dirname, "../../assets/audio-file.png")) {
     this.filesList && this.filesList.clear()
     const viewList = this._newListView(container, imgPath, list, t => path.basename(t.path), t => t.path)
-    viewList.addItemClickListener((e, index) => this.onFileSelected(e, index))
+    viewList.setItemClickListener((e, index) => this.onFileSelected(e, index))
     return viewList
   }
 
@@ -221,7 +211,7 @@ class EditorMain {
     this.segmentsList && this.segmentsList.clear()
     const fileName = path.basename(file.path)
     const viewList = this._newListView(container, imgPath, file.segments, t => t.name, _ => fileName)
-    viewList.addItemClickListener((e, index) => this.onSegmentSelected(e, index))
+    viewList.setItemClickListener((e, index) => this.onSegmentSelected(e, index))
     return viewList
   }
 
