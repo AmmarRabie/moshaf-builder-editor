@@ -244,7 +244,13 @@ const CHAPTERS_ARABIC_NAMES = [
 let CHAPTERS = fs.readFileSync(path.join(__dirname, "/../../../../assets/quran-simple-clean.json"));
 CHAPTERS = JSON.parse(CHAPTERS).quran.sura
 
-
+const createZoomLevels = function (length, start) {
+    start = start || 512
+    const arr = [start]
+    for (let i = 1; i < length; i++) arr.push(arr[i - 1] * 2)
+    return arr
+}
+defaultOptions.zoomLevels = createZoomLevels(10)
 module.exports = {
     projectFileOptions: defaultOptions,
     chapterOptions: defaultOptions,
