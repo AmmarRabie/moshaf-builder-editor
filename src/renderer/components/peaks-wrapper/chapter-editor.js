@@ -23,12 +23,22 @@ class ChapterEditor extends BaseEditor {
      * @param {ProjectFile} file project file to display
      * @param {Object} options optional peaks options, overrides default options
      */
-    setSource(file, options) {
+    setSource(file, segment, options) {
         options = options || {}
         options.playbackSrc = file.path
         options.playbackSrcType = "audio/wav"
+
+        //# setting renderer source
+        //## slicing the data and resemble it again (what to do if segment is too small.. we have to regenerate the data again!)
+        //? should we implement it ?!
+
+        //## if we can store segment data alone and regenerate it when changed (audiowaveform.exe doesn't support it directly)
+        //? should implement ?!
+
+        //## render the whole file, with blocking editing outside segment
+        //? (should block navigation also)
         options.renderSrc = file.data_path
-        options.segments = file.segments[0].chapters.map(chap => ({
+        options.segments = segment.chapters.map(chap => ({
             startTime: chap.globalStart,
             endTime: chap.globalEnd,
             editable: true,
@@ -36,6 +46,12 @@ class ChapterEditor extends BaseEditor {
             aya: chap.extras.best_aya.index,
             ...chap
         }))
+
+        // add boundaries
+        options.boundaries = {
+            start: segment.start,
+            end: segment.end
+        }
         super.setSource(options)
     }
 
@@ -51,7 +67,7 @@ class ChapterEditor extends BaseEditor {
 
 
     addSegmentHere() {
-        super.addSegmentHere({
+        return super.addSegmentHere({
             chapter: 1,
             aya: 1,
         })

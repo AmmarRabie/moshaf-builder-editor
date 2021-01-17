@@ -36,11 +36,18 @@ class BaseEditor {
         $audioContainer[0].load()
 
         // init peaks and save instance
+        this.boundaries = options.boundaries
         this._peaks = Peaks.init(options, (err, peaks) => {
             if (!err) {
                 // so only update annotations after peaks get ready, and segments initialized inside it
                 // and took colors
                 this.initAnnotations({ ...options, segments: peaks.segments._segments })
+                // add points only after peaks initialized
+                if (options.boundaries) {
+                    const { start, end } = this.boundaries
+                    this.instance.points.add({ color: 'red', labelText: "segment start", time: start, editable: false })
+                    this.instance.points.add({ color: 'red', labelText: "segment end", time: end, editable: false })
+                }
             }
             else {
                 console.log(err)
@@ -65,11 +72,21 @@ class BaseEditor {
      * Adds peaks segment in the current zoomview
      */
     addSegmentHere(segmentUserData) {
-        const { startTime, endTime } = this._zoomviewRange
+        let { startTime, endTime } = this._zoomviewRange
+        startTime = this._validateBoundaries(startTime)
+        endTime = this._validateBoundaries(endTime)
+        if (startTime === endTime) return false // no part of segment is inside the view
         this.instance.segments.add({
             startTime, endTime, labelText: "inserted", editable: true, // TODO: get "inserted" text from quick dialog from user
             ...segmentUserData
         })
+    }
+
+    _validateBoundaries(value) {
+        if (!this.boundaries) return value
+        if (value < this.boundaries.start) value = this.boundaries.start
+        if (value > this.boundaries.end) value = this.boundaries.end
+        return value
     }
 
 
@@ -88,10 +105,19 @@ class BaseEditor {
             // if (newValues instanceof String)
             //     segment.update({ labelText: newValue })
             // else
-                segment.update({ ...newValues })
+            segment.update({ ...newValues })
         })
         this.instance.on("annotations.remove", removedSegments => {
             removedSegments.forEach(seg => this.instance.segments.removeById(seg.id))
+        })
+
+        // validate boundaries after drag end
+        this.instance.on("segments.dragend", (segment) => {
+            const { startTime, endTime } = segment
+            const newStart = this._validateBoundaries(startTime)
+            const newEnd = this._validateBoundaries(endTime)
+            if (newStart !== startTime || newEnd !== endTime) // update only at change
+                segment.update({ startTime: newStart, endTime: newEnd })
         })
     }
 
