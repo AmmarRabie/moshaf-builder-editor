@@ -4,3 +4,13 @@ node_modules/
 # audio files
 *.wav
 *.mp3
+
+# generated runtime data
+project_data/
+
+# release
+release-builds/
+dist/
+
+# trials
+trials/

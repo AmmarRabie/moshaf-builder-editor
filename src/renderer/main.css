@@ -10,6 +10,7 @@ ul.annotations {
 }
 ul.annotations li.annotation {
     width: 90%;
+    margin: 0;
     margin-top: 8px;
     font-size: 20px;
 }
@@ -47,3 +48,18 @@ li.annotation .time-info{
 li.annotation .time-info .separator{
     color: black;
 }
+
+
+#actions-container{
+    width: 100%;
+    box-sizing: border-box;
+
+}
+
+#peaks-container{
+    margin-top: 18px;
+    width: 98%;
+    box-sizing: border-box;
+    
+}
+

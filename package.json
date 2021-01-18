@@ -1,21 +1,25 @@
 {
   "name": "moshaf-builder-editor",
-  "version": "1.0.0",
-  "description": "project editor for moshaf builder application",
+  "version": "0.1.0",
+  "description": "GUI editor application for moshaf builder (.mb) files",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder"
   },
-  "author": "AmmarRabie",
+  "author": "Ammar Rabie",
   "license": "MIT",
   "devDependencies": {
-    "electron": "^11.1.1"
+    "electron": "^11.1.1",
+    "electron-builder": "^22.9.1",
+    "xml2js": "^0.4.23"
   },
   "dependencies": {
-    "fluent-ffmpeg": "^2.1.2",
     "jquery": "^3.5.1",
-    "peaks.js": "^0.23.1",
-    "stream-to-array": "^2.3.0",
-    "waveform-playlist": "^3.2.4"
+    "peaks.js": "^0.23.1"
+  },
+  "build": {
+    "appId": "com.quran-processors.moshaf-builder-editor"
   }
 }
