@@ -59,7 +59,10 @@ class EditorMain {
     })
     $("#btn-save").on("click", function (e) {
       self.onUpdateClick()
-      self.saveProject()
+      const outFilePath = dialog.showSaveDialogSync({ filters: [{ name: "moshaf-builder projcet file", extensions: ["mb", "json"] }] })
+      if (outFilePath === undefined) return
+      console.log("saving into ", outFilePath);
+      self.saveProject(outFilePath)
     })
 
     $("input#chapter-select").on("input", function (e) {
@@ -74,8 +77,6 @@ class EditorMain {
     $("#btn-add-note").on("click", e => {
       this.currentEditor && this.currentEditor.addSegmentHere()
     })
-
-    this.loadProject() // TODO: remove auto open project
   }
 
   loadProject(projectPath) {
