@@ -1,8 +1,8 @@
 const { CHAPTERS_ARABIC_NAMES, CHAPTERS } = require("./defaults")
-const BaseAnnotation =  require("./base-annotation")
+const BaseAnnotation = require("./base-annotation")
 
 
-class ChapterAnnotation extends BaseAnnotation{
+class ChapterAnnotation extends BaseAnnotation {
 
     static template = `
     <li class="annotation">
@@ -33,7 +33,7 @@ class ChapterAnnotation extends BaseAnnotation{
         // custom to chapter annotation, select inputs
         const $selects = this.$instance.find("select")
         ChapterAnnotation._inflateChapters($($selects[0]))
-        $($selects[0]).change(function (e) {
+        $($selects[0]).on("change", function (e) {
             ChapterAnnotation._inflateAyat($($selects[1]), this.value)
         })
 
@@ -42,7 +42,7 @@ class ChapterAnnotation extends BaseAnnotation{
 
     update(chap) {
         const updated = super.update(chap)
-        if(!updated) return updated
+        if (!updated) return updated
         this.$chapterSelect.val(chap.chapter) // one-based
         ChapterAnnotation._inflateAyat(this.$ayatSelect, chap.chapter)
         this.$ayatSelect.val(chap.aya) // one-based
@@ -51,14 +51,20 @@ class ChapterAnnotation extends BaseAnnotation{
     _setupEmitter() {
         super._setupEmitter()
         const self = this
-        this.$instance.find("select").change(function (e) {
-            self.eventEmitter.emit("annotations.update", {
-                segment: self.note,
-                newValues: { labelText: self.$chapterSelect.val().toString() + "_" + self.$ayatSelect.val().toString() }
-            })
+        this.$chapterSelect.on("change", function (e) {
+            self._emitUpdate($(this).val(), 1)
+        })
+        this.$ayatSelect.on("change", function (e) {
+            self._emitUpdate(self.$chapterSelect.val(), $(this).val())
         })
     }
 
+    _emitUpdate(sura, aya) {
+        this.eventEmitter.emit("annotations.update", {
+            segment: this.note,
+            newValues: { labelText: sura.toString() + "_" + aya.toString() }
+        })
+    }
 
     static _inflateChapters($select) {
         for (let i = 0; i < CHAPTERS_ARABIC_NAMES.length; i++) {
