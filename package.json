@@ -1,6 +1,6 @@
 {
   "name": "moshaf-builder-editor",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "GUI editor application for moshaf builder (.mb) files",
   "main": "main.js",
   "scripts": {
